@@ -315,21 +315,29 @@
         const MID_END    = 48;
         const TREBLE_END = 240;
 
+        let gainNodeRef = null;
+
         function initAudio() {
             if (audioStarted) return;
             audioStarted = true;
 
             audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             sourceNode = audioCtx.createMediaElementSource(audioEl);
+
+            gainNodeRef = audioCtx.createGain();
+            gainNodeRef.gain.value = 4.0;
+
             analyser = audioCtx.createAnalyser();
             analyser.fftSize = 2048;
             analyser.smoothingTimeConstant = 0.82;
 
-            sourceNode.connect(analyser);
+            sourceNode.connect(gainNodeRef);
+            gainNodeRef.connect(analyser);
             analyser.connect(audioCtx.destination);
 
             freqData = new Uint8Array(analyser.frequencyBinCount);
 
+            audioEl.volume = 1.0;
             audioEl.play().catch(function(err) { console.warn('Lecture audio bloquee:', err); });
         }
 
